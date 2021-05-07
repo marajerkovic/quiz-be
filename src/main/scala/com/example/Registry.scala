@@ -50,7 +50,7 @@ object Registry {
         otherUsers = otherUsers.filterNot(_.equals(opt2))
         val opt3: String = otherUsers.apply(random.nextInt(otherUsers.size))
         replyTo ! FunFactQuestion(question.fact, Random.shuffle(List(opt1, opt2, opt3, question.owner)), question.owner)
-        registry(users, allFacts, pendingFacts)// - question)
+        registry(users, allFacts, pendingFacts - question)
       case Reset(replyTo) =>
         replyTo ! FactOk()
         registry(Set.empty, Set.empty, Set.empty)
