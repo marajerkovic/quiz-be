@@ -33,7 +33,8 @@ object Registry {
     Behaviors.receiveMessage {
       case CreateFact(fact: FunFact, replyTo) =>
         replyTo ! FactOk()
-        registry(users + fact.owner, allFacts + fact, pendingFacts + fact)
+        val normalizedFact = fact.copy(owner = fact.owner.trim.toUpperCase())
+        registry(users + normalizedFact.owner, allFacts + normalizedFact, pendingFacts + normalizedFact)
       case GetNumberOfFacts(replyTo) =>
         replyTo ! NumberOfFacts(pendingFacts.size)
         Behaviors.same
