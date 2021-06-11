@@ -29,7 +29,8 @@ class Routes(userRegistry: ActorRef[Registry.Command])(implicit val system: Acto
   def getNumberOfFacts(): Future[NumberOfFacts] = userRegistry.ask(GetNumberOfFacts)
   def createFact(funFact: FunFact): Future[FactOk] = userRegistry.ask(CreateFact(funFact, _))
   def getQuestion(): Future[FunFactQuestion] = userRegistry.ask(GetQuestion)
-  def reset(): Future[FactOk] = userRegistry.ask(Reset)
+  def resetQuestions(): Future[FactOk] = userRegistry.ask(ResetQuestions)
+  def resetFacts(): Future[FactOk] = userRegistry.ask(ResetFacts)
 
   val routes: Route =
     cors() {
@@ -63,7 +64,14 @@ class Routes(userRegistry: ActorRef[Registry.Command])(implicit val system: Acto
             }
           } ~
             delete {
-              onSuccess(reset()) { performed =>
+              onSuccess(resetQuestions()) { performed =>
+                complete(StatusCodes.OK, performed)
+              }
+            }
+        } ~
+        path("admin" / "facts") {
+            delete {
+              onSuccess(resetFacts()) { performed =>
                 complete(StatusCodes.OK, performed)
               }
             }

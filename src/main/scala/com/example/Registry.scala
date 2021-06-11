@@ -6,7 +6,7 @@ import akka.actor.typed.Behavior
 import akka.actor.typed.scaladsl.Behaviors
 
 import scala.collection.immutable
-import scala.util.Random
+import scala.util.{Random, Try}
 
 //#user-case-classes
 final case class FunFact(fact: String, owner: String)
@@ -23,11 +23,14 @@ object Registry {
   final case class GetAllFacts(replyTo: ActorRef[AllFacts]) extends Command
   final case class CreateFact(fact: FunFact, replyTo: ActorRef[FactOk]) extends Command
   final case class GetQuestion(replyTo: ActorRef[FunFactQuestion]) extends Command
-  final case class Reset(replyTo: ActorRef[FactOk]) extends Command
+  final case class ResetQuestions(replyTo: ActorRef[FactOk]) extends Command
+  final case class ResetFacts(replyTo: ActorRef[FactOk]) extends Command
 
   val random = new Random()
 
   def apply(): Behavior[Command] = registry(Set.empty, Set.empty, Set.empty)
+
+  val dummyFunFact = FunFactQuestion("No more questions", List("1","2","3","4"), "1")
 
   private def registry(users: Set[String], allFacts: Set[FunFact], pendingFacts: Set[FunFact]): Behavior[Command] =
     Behaviors.receiveMessage {
@@ -41,7 +44,7 @@ object Registry {
       case GetAllFacts(replyTo) =>
         replyTo ! AllFacts(allFacts.toList)
         Behaviors.same
-      case GetQuestion(replyTo) =>
+      case GetQuestion(replyTo) => Try {
         val index = random.nextInt(pendingFacts.size)
         val question: FunFact = pendingFacts.toList(index)
         var otherUsers: List[String] = (users - question.owner).toList
@@ -52,8 +55,12 @@ object Registry {
         val opt3: String = otherUsers.apply(random.nextInt(otherUsers.size))
         replyTo ! FunFactQuestion(question.fact, Random.shuffle(List(opt1, opt2, opt3, question.owner)), question.owner)
         registry(users, allFacts, pendingFacts - question)
+      }.getOrElse(() => {
+        replyTo ! dummyFunFact
+        Behaviors.same
+      })
       case Reset(replyTo) =>
         replyTo ! FactOk()
-        registry(Set.empty, Set.empty, Set.empty)
+        registry(users, allFacts, allFacts)
     }
 }
