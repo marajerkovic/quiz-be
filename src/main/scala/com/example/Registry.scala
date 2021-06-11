@@ -55,7 +55,7 @@ object Registry {
         val opt3: String = otherUsers.apply(random.nextInt(otherUsers.size))
         replyTo ! FunFactQuestion(question.fact, Random.shuffle(List(opt1, opt2, opt3, question.owner)), question.owner)
         registry(users, allFacts, pendingFacts - question)
-      }.getOrElse(() => {
+      }.getOrElse({
         replyTo ! dummyFunFact
         Behaviors.same
       })
