@@ -59,8 +59,11 @@ object Registry {
         replyTo ! dummyFunFact
         Behaviors.same
       })
-      case Reset(replyTo) =>
+      case ResetQuestions(replyTo) =>
         replyTo ! FactOk()
         registry(users, allFacts, allFacts)
+      case ResetFacts(replyTo) =>
+        replyTo ! FactOk()
+        registry(Set.empty, Set.empty, Set.empty)
     }
 }
