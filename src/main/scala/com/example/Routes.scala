@@ -38,21 +38,21 @@ class Routes(userRegistry: ActorRef[Registry.Command])(implicit val system: Acto
         post {
           entity(as[FunFact]) { fact =>
             onSuccess(createFact(fact)) { performed =>
-              complete(StatusCodes.Created, performed)
+              system.log.info("facts");complete(StatusCodes.Created, performed)
             }
           }
         } ~
           path("all") {
             get {
               onSuccess(getAllFacts()) { facts =>
-                complete(facts)
+                system.log.info("facts/all");complete(facts)
               }
             }
           } ~
           path("pending") {
             get {
               onSuccess(getNumberOfFacts()) { n =>
-                complete(n)
+                system.log.info("facts/pending");complete(n)
               }
             }
           }
@@ -60,7 +60,7 @@ class Routes(userRegistry: ActorRef[Registry.Command])(implicit val system: Acto
         path("admin" / "questions") {
           get {
             onSuccess(getQuestion()) { q =>
-              complete(q)
+              system.log.info("admin/questions");complete(q)
             }
           } ~
             delete {
