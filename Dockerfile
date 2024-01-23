@@ -1,6 +1,5 @@
 FROM openjdk:latest
-WORKDIR /opt/docker
-ADD --chown=daemon:daemon opt /opt
-USER daemon
+WORKDIR /
+COPY "akka-quizz_2.13-0.1.0-SNAPSHOT.jar" "/app.jar"
 EXPOSE 9000
-ENTRYPOINT ["/opt/docker/bin/akka-quizz"]
+ENTRYPOINT ["/app.jar"]
