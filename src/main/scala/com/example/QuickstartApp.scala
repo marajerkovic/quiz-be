@@ -5,14 +5,24 @@ import akka.actor.typed.scaladsl.Behaviors
 import akka.http.scaladsl.Http
 import akka.http.scaladsl.server.Route
 
-import scala.util.Failure
-import scala.util.Success
+import scala.util.{Failure, Success}
 
-//#main-class
 object QuickstartApp {
-  //#start-http-server
+
+  def main(args: Array[String]): Unit = {
+    val rootBehavior = Behaviors.setup[Nothing] { context =>
+      val userRegistryActor = context.spawn(Registry(), "RegistryActor")
+      context.watch(userRegistryActor)
+
+      val routes = new Routes(userRegistryActor)(context.system)
+      startHttpServer(routes.routes)(context.system)
+
+      Behaviors.empty
+    }
+    ActorSystem[Nothing](rootBehavior, "HelloAkkaHttpServer")
+  }
+
   private def startHttpServer(routes: Route)(implicit system: ActorSystem[_]): Unit = {
-    // Akka HTTP still needs a classic ActorSystem to start
     import system.executionContext
 
     val futureBinding = Http().newServerAt("0.0.0.0", sys.env("PORT").toInt).bind(routes)
@@ -25,20 +35,5 @@ object QuickstartApp {
         system.terminate()
     }
   }
-  //#start-http-server
-  def main(args: Array[String]): Unit = {
-    //#server-bootstrapping
-    val rootBehavior = Behaviors.setup[Nothing] { context =>
-      val userRegistryActor = context.spawn(Registry(), "RegistryActor")
-      context.watch(userRegistryActor)
 
-      val routes = new Routes(userRegistryActor)(context.system)
-      startHttpServer(routes.routes)(context.system)
-
-      Behaviors.empty
-    }
-    val system = ActorSystem[Nothing](rootBehavior, "HelloAkkaHttpServer")
-    //#server-bootstrapping
-  }
 }
-//#main-class

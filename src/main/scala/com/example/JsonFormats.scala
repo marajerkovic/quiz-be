@@ -1,6 +1,6 @@
 package com.example
 
-//#json-formats
+import com.example.Registry.FactOk
 import spray.json.{DefaultJsonProtocol, JsArray, JsValue, JsonFormat, RootJsonFormat}
 
 object JsonFormats  {
